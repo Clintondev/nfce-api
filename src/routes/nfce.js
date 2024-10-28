@@ -1,6 +1,7 @@
 // routes/nfce.js
 const express = require('express');
 const nfceController = require('../controllers/nfceController');
+const { ensureAuthenticated } = require('../middlewares/auth');
 const router = express.Router();
 
 /**
@@ -87,6 +88,6 @@ const router = express.Router();
  *       500:
  *         description: Erro no servidor
  */
-router.get('/:parametro', nfceController.getNfceData);
+router.get('/:parametro',ensureAuthenticated, nfceController.getNfceData);
 
 module.exports = router;
