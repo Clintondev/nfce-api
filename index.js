@@ -4,7 +4,7 @@ const puppeteer = require('puppeteer');
 require('dotenv').config();
 const swaggerUi = require('swagger-ui-express');
 const passport = require('./src/config/passport');
-const session = require('express-session'); // Adicione esta linha
+const session = require('express-session'); 
 const swaggerSpecs = require('./src/config/swagger');
 const errorHandler = require('./src/middlewares/errorHandler');
 const nfceRoutes = require('./src/routes/nfce');
@@ -15,7 +15,6 @@ const User = require('./src/models/user');
 const app = express();
 const PORT = process.env.PORT || 3400;
 
-// Configurar sessões
 app.use(
     session({
       secret: process.env.SESSION_SECRET,
@@ -24,11 +23,8 @@ app.use(
     })
   );
 
-// Inicializar o Passport
 app.use(passport.initialize());
-app.use(passport.session());
 
-// Rotas de autenticação
 app.use('/auth', authRoutes);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
@@ -47,4 +43,5 @@ sequelize.sync({ alter: true })
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
+
 });

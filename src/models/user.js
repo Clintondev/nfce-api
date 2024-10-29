@@ -13,6 +13,7 @@ User.init(
     },
     name: DataTypes.STRING,
     email: DataTypes.STRING,
+    refreshToken: DataTypes.TEXT,
   },
   {
     sequelize,

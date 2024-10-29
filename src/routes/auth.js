@@ -6,27 +6,40 @@ const router = express.Router();
 // Iniciar a autenticação com o Google
 router.get(
   '/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    accessType: 'offline',
+    prompt: 'consent',
+  })
 );
 
 // Manipular o callback após a autenticação
 router.get(
   '/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: '/auth/failure',
-    successRedirect: '/auth/success',
-  })
+  (req, res, next) => {
+    passport.authenticate('google', { session: false }, (err, data, info) => {
+      if (err || !data) {
+        return res.status(401).json({ message: 'Falha na autenticação.' });
+      }
+
+      // data contém { user, token }
+      const { token } = data;
+
+      // Retornar o token JWT no corpo da resposta em formato JSON
+      res.json({
+        message: 'Autenticação bem-sucedida!',
+        token: token,
+      });
+    })(req, res, next);
+  }
 );
 
-router.get('/success', (req, res) => {
-  res.send('Autenticação bem-sucedida!');
-});
-
+// Rota de falha na autenticação
 router.get('/failure', (req, res) => {
-  res.send('Falha na autenticação.');
+  res.status(401).json({ message: 'Falha na autenticação.' });
 });
 
-// Logout
+// Rota de logout (opcional)
 router.get('/logout', (req, res) => {
   req.logout();
   res.redirect('/');
