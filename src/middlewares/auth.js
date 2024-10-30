@@ -26,7 +26,6 @@ exports.ensureAuthenticated = (req, res, next) => {
       return res.status(401).json({ error: 'Token inválido.' });
     }
 
-    // Adicionar o usuário decodificado ao objeto de requisição
     req.user = decoded;
 
     return next();

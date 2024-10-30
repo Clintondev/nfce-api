@@ -2,6 +2,8 @@
 const express = require('express');
 const nfceController = require('../controllers/nfceController');
 const { ensureAuthenticated } = require('../middlewares/auth');
+const { check, validationResult } = require('express-validator');
+
 const router = express.Router();
 
 /**
@@ -9,7 +11,8 @@ const router = express.Router();
  * /nfce/{parametro}:
  *   get:
  *     summary: Consulta NFC-e
- *     description: Faz a consulta de uma NFC-e a partir de sua chave de acesso.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: parametro
@@ -83,11 +86,62 @@ const router = express.Router();
  *                   type: string
  *                 consumerInfo:
  *                   type: string
+ *       401:
+ *         description: Não autorizado - Token inválido ou não fornecido
  *       404:
  *         description: NFC-e não encontrada
  *       500:
  *         description: Erro no servidor
  */
-router.get('/:parametro',ensureAuthenticated, nfceController.getNfceData);
+/**
+ * @swagger
+ * /nfce:
+ *   get:
+ *     summary: Lista as NFC-e do usuário
+ *     description: Retorna todas as NFC-e consultadas pelo usuário autenticado.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de NFC-e retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   data:
+ *                     type: object
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *       401:
+ *         description: Não autorizado - Token inválido ou não fornecido
+ *       500:
+ *         description: Erro no servidor
+ */
+
+router.get(
+    '/:parametro',
+    ensureAuthenticated,
+    [check('parametro').isString().trim().escape()],
+    nfceController.getNfceData
+  );
+
+  router.get(
+    '/:parametro',
+    ensureAuthenticated,
+    [
+      check('parametro')
+        .isString()
+        .withMessage('O parâmetro deve ser uma string.')
+        .trim()
+        .escape(),
+    ],
+    nfceController.getNfceData
+  );
 
 module.exports = router;

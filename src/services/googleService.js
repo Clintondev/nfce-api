@@ -20,13 +20,17 @@ async function getAccessToken(user) {
 
   try {
     const { token } = await oauth2Client.getAccessToken();
-
-    // Opcional: Atualizar o Access Token do usuário no banco de dados, se necessário
-    // Você pode armazenar o novo Access Token se precisar
-
     return token;
   } catch (err) {
     console.error('Erro ao obter novo Access Token:', err);
+
+    if (err.response && err.response.data) {
+      const errorData = err.response.data;
+      if (errorData.error === 'invalid_grant') {
+        throw new Error('Refresh Token inválido ou expirado.');
+      }
+    }
+
     throw err;
   }
 }

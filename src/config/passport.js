@@ -5,19 +5,6 @@ const User = require('../models/user');
 const { encrypt } = require('./crypto');
 const jwt = require('jsonwebtoken');
 
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findByPk(id);
-    done(null, user);
-  } catch (err) {
-    done(err, null);
-  }
-});
-
 passport.use(
   new GoogleStrategy(
     {

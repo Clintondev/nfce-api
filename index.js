@@ -11,17 +11,10 @@ const nfceRoutes = require('./src/routes/nfce');
 const authRoutes = require('./src/routes/auth');
 const sequelize = require('./src/config/database');
 const User = require('./src/models/user');
+const NfceData = require('./src/models/nfceData'); 
 
 const app = express();
 const PORT = process.env.PORT || 3400;
-
-app.use(
-    session({
-      secret: process.env.SESSION_SECRET,
-      resave: false,
-      saveUninitialized: false,
-    })
-  );
 
 app.use(passport.initialize());
 
