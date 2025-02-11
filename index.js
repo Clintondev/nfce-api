@@ -68,7 +68,7 @@ sequelize.authenticate()
   });
 
 // Sincronizar banco de dados
-sequelize.sync({ alter: true })
+sequelize.sync({ alter: false })
   .then(() => console.log('Banco de dados sincronizado.'))
   .catch((err) => console.error('Erro ao sincronizar banco de dados:', err));
 

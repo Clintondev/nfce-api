@@ -20,6 +20,7 @@
     "express-rate-limit": "^7.4.1",
     "express-session": "^1.18.1",
     "express-validator": "^7.2.0",
+    "get-intrinsic": "^1.2.7",
     "helmet": "^8.0.0",
     "ioredis": "^5.5.0",
     "jsonwebtoken": "^9.0.2",
