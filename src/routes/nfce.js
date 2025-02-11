@@ -124,14 +124,6 @@ const router = express.Router();
  *       500:
  *         description: Erro no servidor
  */
-
-router.get(
-    '/:parametro',
-    ensureAuthenticated,
-    [check('parametro').isString().trim().escape()],
-    nfceController.getNfceData
-  );
-
   router.get(
     '/:parametro',
     ensureAuthenticated,

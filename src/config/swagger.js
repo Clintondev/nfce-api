@@ -1,4 +1,6 @@
 // config/swagger.js
+require('dotenv').config();
+
 const swaggerJsdoc = require('swagger-jsdoc');
 
 const options = {
@@ -11,11 +13,11 @@ const options = {
     },
     servers: [
       {
-        url: 'http://18.188.56.142:3400', 
+        url: process.env.SWAGGER_SERVER_URL || 'http://localhost:3400',
       },
     ],
   },
-  apis: ['./src/routes/*.js'], 
+  apis: ['./src/routes/*.js'],
 };
 
 const specs = swaggerJsdoc(options);

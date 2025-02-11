@@ -1,9 +1,12 @@
 // services/nfceService.js
 const puppeteer = require('puppeteer');
+require('dotenv').config();
 
 exports.fetchNfceData = async (parametro) => {
   const encodedParametro = encodeURIComponent(parametro);
-  const urlNfce = `http://nfe.sefaz.go.gov.br/nfeweb/sites/nfce/d/danfeNFCe?p=${encodedParametro}`;
+  const baseUrl = process.env.NFE_SEFAZ_URL;
+  
+  const urlNfce = `${baseUrl}/nfeweb/sites/nfce/d/danfeNFCe?p=${encodedParametro}`;
 
   const browser = await puppeteer.launch({
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -24,7 +27,7 @@ exports.fetchNfceData = async (parametro) => {
 
   const iframeUrl = iframeSrc.startsWith('http')
     ? iframeSrc
-    : `http://nfe.sefaz.go.gov.br${iframeSrc}`;
+    : `${baseUrl}${iframeSrc}`;
 
   await page.goto(iframeUrl, { waitUntil: 'networkidle2' });
 

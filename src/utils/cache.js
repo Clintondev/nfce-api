@@ -17,14 +17,14 @@ async function getRedisClient() {
       console.log('Conectado ao Redis.');
     });
 
-    await client.connect(); // Garante que a conexão seja estabelecida uma vez
+    await client.connect(); 
     console.log('Redis cliente conectado com sucesso!');
   }
 
   return client;
 }
 
-const DEFAULT_EXPIRATION = 3600; // 1 hora
+const DEFAULT_EXPIRATION = 3600; 
 
 module.exports = {
   set: async (key, value, expiration = DEFAULT_EXPIRATION) => {
@@ -32,7 +32,7 @@ module.exports = {
       const redisClient = await getRedisClient();
 
       if (typeof value !== 'string') {
-        value = JSON.stringify(value); // Converte objetos para string
+        value = JSON.stringify(value); 
       }
 
       await redisClient.setEx(key, expiration, value);
@@ -48,9 +48,9 @@ module.exports = {
       const data = await redisClient.get(key);
 
       try {
-        return data ? JSON.parse(data) : null; // Retorna o JSON se possível
+        return data ? JSON.parse(data) : null; 
       } catch (err) {
-        return data; // Retorna como string se não for JSON
+        return data; 
       }
     } catch (err) {
       console.error('Erro ao obter valor do Redis:', err);

@@ -5,10 +5,14 @@ const passport = require('./src/config/passport');
 const swaggerSpecs = require('./src/config/swagger');
 const errorHandler = require('./src/middlewares/errorHandler');
 const nfceRoutes = require('./src/routes/nfce');
+const { ensureAuthenticated, ensureAdmin } = require('./src/middlewares/auth');
 const authRoutes = require('./src/routes/auth');
 const sequelize = require('./src/config/database');
-const nfceQueue = require('./src/queues/nfceQueue');
+const { ExpressAdapter } = require('@bull-board/express');
+const { createBullBoard } = require('@bull-board/api');
+const { BullAdapter } = require('@bull-board/api/bullAdapter');
 const nfceProcessor = require('./src/queues/processors/nfceProcessor');
+const nfceQueue = require('./src/queues/nfceQueue');
 const cache = require('./src/utils/cache');
 
 const app = express();
@@ -28,6 +32,17 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Rotas de NFC-e
 app.use('/nfce', nfceRoutes);
+
+const serverAdapter = new ExpressAdapter();
+serverAdapter.setBasePath('/admin/queues');
+
+// Configura o Bull Board
+createBullBoard({
+  queues: [new BullAdapter(nfceQueue)],
+  serverAdapter,
+});
+
+app.use('/admin/queues', serverAdapter.getRouter());
 
 // Middleware de tratamento de erros
 app.use(errorHandler);
@@ -64,6 +79,7 @@ cache.testConnection()
     console.error('Erro ao testar conexão com Redis:', err);
     process.exit(1); // Finaliza o processo em caso de falha
   });
+
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

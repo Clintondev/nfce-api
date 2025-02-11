@@ -2,7 +2,6 @@
 const jwt = require('jsonwebtoken');
 
 exports.ensureAuthenticated = (req, res, next) => {
-  // Obter o token do header de autorização
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -30,4 +29,12 @@ exports.ensureAuthenticated = (req, res, next) => {
 
     return next();
   });
+};
+
+exports.ensureAdmin = (req, res, next) => {
+  if (!req.user || !req.user.isAdmin) {
+    return res.status(403).json({ error: 'Acesso negado. Usuário não é administrador.' });
+  }
+
+  return next();
 };

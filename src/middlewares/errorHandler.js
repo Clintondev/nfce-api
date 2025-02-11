@@ -1,10 +1,10 @@
-// middlewares/errorHandler.js
+const logger = require('../config/logger');
+
 module.exports = (err, req, res, next) => {
-    console.error(err.stack);
-  
-    res.status(500).json({
-      error: 'Something went wrong!',  
-      details: err.message,  
-    });
-  };
-  
+  logger.error('Erro interno no servidor: %s', err.stack);
+
+  res.status(500).json({
+    error: 'Something went wrong!',
+    details: err.message,
+  });
+};

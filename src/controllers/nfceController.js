@@ -14,16 +14,13 @@ exports.getNfceData = async (req, res) => {
   try {
     const { parametro } = req.params;
 
-    // Verifica se os dados estão no cache
     const cachedData = await cache.get(parametro);
     if (cachedData) {
       return res.status(200).json(cachedData);
     }
 
-    // Adiciona a tarefa de scraping na fila
-    const job = await nfceQueue.add({ parametro });
-
-    // Retorna imediatamente ao cliente com o ID do job
+    const job = await nfceQueue.add({ parametro, userId: req.user.id });
+    
     res.status(202).json({
       message: 'Processamento iniciado. Consulte o status usando o jobId.',
       jobId: job.id,
@@ -36,10 +33,9 @@ exports.getNfceData = async (req, res) => {
 
 exports.getUserNfceData = async (req, res) => {
   try {
-    // Recupera as NFC-e associadas ao usuário
     const nfceDataList = await NfceData.findAll({
       where: { userId: req.user.id },
-      attributes: ['id', 'totalItems', 'totalAmount', 'createdAt'], // Ajuste dos atributos retornados
+      attributes: ['id', 'totalItems', 'totalAmount', 'createdAt'], 
       order: [['createdAt', 'DESC']],
     });
 
@@ -66,7 +62,7 @@ exports.getJobStatus = async (req, res) => {
     res.json({
       state,
       progress,
-      result: job.returnvalue || null, // Dados retornados, se já processados
+      result: job.returnvalue || null, 
     });
   } catch (error) {
     console.error('Erro ao consultar status da tarefa:', error.message);

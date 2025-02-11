@@ -57,7 +57,6 @@ Item.init(
   }
 );
 
-// Relacionamentos
 Item.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
 User.hasMany(Item, { foreignKey: 'userId' });
 
