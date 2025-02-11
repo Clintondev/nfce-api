@@ -1,2 +1,8 @@
 .env
 node_modules
+
+package-lock.json
+
+merge_files.py
+
+output.txt

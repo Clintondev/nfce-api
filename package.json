@@ -20,10 +20,12 @@
     "express-validator": "^7.2.0",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.12.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "playwright": "^1.47.2",
     "puppeteer": "^23.6.0",
+    "sequelize": "^6.37.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },

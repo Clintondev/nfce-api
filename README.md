@@ -194,18 +194,3 @@ ENCRYPTION_KEY=chave_hexadecimal_de_32_bytes
 
 ---
 
-## Documentação e Testes
-
-- **Swagger:**  
-  A documentação dos endpoints é gerada automaticamente com Swagger e pode ser acessada via `/api-docs`.
-
-- **Testes:**  
-  Recomenda-se a implementação de testes unitários e de integração utilizando frameworks como Mocha ou Jest para garantir a estabilidade e integridade da API.
-
----
-
-## Considerações Finais
-
-Esta API para consulta de NFC-e demonstra uma integração avançada de scraping, autenticação segura, persistência relacional e documentação automatizada. A arquitetura modular permite fácil manutenção e escalabilidade, servindo como base para integrações com front-ends e outros sistemas. O uso de tecnologias como Puppeteer, Passport com Google OAuth2 e Sequelize reforça o compromisso com segurança e eficiência na extração e gerenciamento de dados.
-
----
