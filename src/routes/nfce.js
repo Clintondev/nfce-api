@@ -3,6 +3,7 @@ const express = require('express');
 const nfceController = require('../controllers/nfceController');
 const { ensureAuthenticated } = require('../middlewares/auth');
 const { check, validationResult } = require('express-validator');
+const nfceQueue = require('../queues/nfceQueue');
 
 const router = express.Router();
 
@@ -143,5 +144,25 @@ router.get(
     ],
     nfceController.getNfceData
   );
+
+  router.get('/status/:jobId', async (req, res) => {
+    const { jobId } = req.params;
+  
+    try {
+      const job = await nfceQueue.getJob(jobId);
+  
+      if (!job) {
+        return res.status(404).json({ error: 'Tarefa não encontrada.' });
+      }
+  
+      const state = await job.getState();
+      const progress = job.progress();
+  
+      res.json({ state, progress, data: job.returnvalue });
+    } catch (error) {
+      console.error('Erro ao consultar status da tarefa:', error.message);
+      res.status(500).json({ error: 'Erro ao consultar status da tarefa.' });
+    }
+  });
 
 module.exports = router;

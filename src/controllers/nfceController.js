@@ -1,9 +1,9 @@
-// controllers/nfceController.js
 const { validationResult } = require('express-validator');
-const nfceService = require('../services/nfceService');
 const NfceData = require('../models/nfceData');
 const Vendor = require('../models/vendor');
 const Item = require('../models/item');
+const nfceQueue = require('../queues/nfceQueue');
+const cache = require('../utils/cache');
 
 exports.getNfceData = async (req, res) => {
   const errors = validationResult(req);
@@ -13,74 +13,63 @@ exports.getNfceData = async (req, res) => {
 
   try {
     const { parametro } = req.params;
-    const nfceData = await nfceService.fetchNfceData(parametro);
 
-    if (!nfceData) {
-      return res.status(404).json({ message: 'Dados da NFC-e não encontrados' });
+    // Verifica se os dados estão no cache
+    const cachedData = await cache.get(parametro);
+    if (cachedData) {
+      return res.status(200).json(cachedData);
     }
 
-    const { name, CNPJ, address } = nfceData.vendor;
-    let vendor = await Vendor.findOne({ where: { CNPJ } });
+    // Adiciona a tarefa de scraping na fila
+    const job = await nfceQueue.add({ parametro });
 
-    if (!vendor) {
-      vendor = await Vendor.create({
-        name,
-        CNPJ,
-        address,
-        userId: req.user.id,
-      });
-    }
-
-    const savedData = await NfceData.create({
-      totalItems: nfceData.totalInfo.totalItems,
-      totalAmount: nfceData.totalInfo.totalAmount,
-      paymentMethod: nfceData.totalInfo.paymentMethod,
-      totalPaid: nfceData.totalInfo.totalPaid,
-      change: nfceData.totalInfo.change,
-      number: nfceData.generalInfo.number,
-      series: nfceData.generalInfo.series,
-      emission: nfceData.generalInfo.emission,
-      authorizationProtocol: nfceData.generalInfo.authorizationProtocol,
-      xmlVersion: nfceData.generalInfo.xmlVersion,
-      xsltVersion: nfceData.generalInfo.xsltVersion,
-      accessKey: nfceData.accessKey,
-      consumerInfo: nfceData.consumerInfo,
-      userId: req.user.id,
-      vendorId: vendor.id,
+    // Retorna imediatamente ao cliente com o ID do job
+    res.status(202).json({
+      message: 'Processamento iniciado. Consulte o status usando o jobId.',
+      jobId: job.id,
     });
-
-    const items = nfceData.items.map(item => ({
-      name: item.name,
-      code: item.code,
-      quantity: item.quantity,
-      unit: item.unit,
-      unitPrice: item.unitPrice,
-      totalPrice: item.totalPrice,
-      userId: req.user.id,
-      accessKey: nfceData.accessKey,
-      nfceDataId: savedData.id,
-    }));
-
-    await Item.bulkCreate(items);
-
-    res.json(nfceData);
   } catch (error) {
-    console.error('Erro ao obter ou salvar dados da NFC-e:', error);
-    res.status(500).json({ error: 'Ocorreu um erro ao processar sua solicitação' });
+    console.error('Erro ao adicionar tarefa à fila:', error.message);
+    res.status(500).json({ error: 'Erro ao processar sua solicitação.' });
   }
 };
 
 exports.getUserNfceData = async (req, res) => {
   try {
+    // Recupera as NFC-e associadas ao usuário
     const nfceDataList = await NfceData.findAll({
       where: { userId: req.user.id },
-      attributes: ['id', 'data', 'createdAt'], 
-      order: [['createdAt', 'DESC']], 
+      attributes: ['id', 'totalItems', 'totalAmount', 'createdAt'], // Ajuste dos atributos retornados
+      order: [['createdAt', 'DESC']],
     });
 
     res.json(nfceDataList);
   } catch (error) {
-    console.error('Erro ao obter dados das NFC-e do usuário:', error);
-    res.status(500).json({ error: 'Ocorreu um erro ao processar sua solicitação' });
+    console.error('Erro ao obter dados das NFC-e do usuário:', error.message);
+    res.status(500).json({ error: 'Erro ao processar sua solicitação.' });
+  }
+};
+
+exports.getJobStatus = async (req, res) => {
+  const { jobId } = req.params;
+
+  try {
+    const job = await nfceQueue.getJob(jobId);
+
+    if (!job) {
+      return res.status(404).json({ error: 'Tarefa não encontrada.' });
+    }
+
+    const state = await job.getState();
+    const progress = job.progress();
+
+    res.json({
+      state,
+      progress,
+      result: job.returnvalue || null, // Dados retornados, se já processados
+    });
+  } catch (error) {
+    console.error('Erro ao consultar status da tarefa:', error.message);
+    res.status(500).json({ error: 'Erro ao consultar o status da tarefa.' });
   }
 };
