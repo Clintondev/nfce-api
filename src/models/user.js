@@ -1,4 +1,3 @@
-// src/models/user.js
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
@@ -11,9 +10,12 @@ User.init(
       allowNull: false,
       unique: true,
     },
-    name: DataTypes.STRING,
+    name: DataTypes.STRING, 
     email: DataTypes.STRING,
     refreshToken: DataTypes.TEXT,
+    picture: DataTypes.STRING,     
+    givenName: DataTypes.STRING,   
+    familyName: DataTypes.STRING,  
   },
   {
     sequelize,

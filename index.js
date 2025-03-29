@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 require('dotenv').config();
 const swaggerUi = require('swagger-ui-express');
 const passport = require('./src/config/passport');
@@ -7,6 +8,7 @@ const errorHandler = require('./src/middlewares/errorHandler');
 const nfceRoutes = require('./src/routes/nfce');
 const { ensureAuthenticated, ensureAdmin } = require('./src/middlewares/auth');
 const authRoutes = require('./src/routes/auth');
+const authWebRoutes = require('./src/routes/auth-web');
 const dataRoutes = require('./src/routes/data');
 const sequelize = require('./src/config/database');
 const { ExpressAdapter } = require('@bull-board/express');
@@ -19,18 +21,16 @@ const cache = require('./src/utils/cache');
 const app = express();
 const PORT = process.env.PORT || 3400;
 
-app.use(express.json());
+app.use(cors());
 
+app.use(express.json());
 app.use(passport.initialize());
 
 app.use('/auth', authRoutes);
-
+app.use('/auth', authWebRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
-
 app.use('/nfce', nfceRoutes);
-
 app.use('/data', dataRoutes);
-
 
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/admin/queues');
